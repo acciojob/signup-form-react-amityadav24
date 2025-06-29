@@ -2,126 +2,92 @@ import React, { useState } from "react";
 import "./../styles/App.css";
 
 const App = () => {
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     name: "",
     email: "",
     gender: "male",
     phoneNumber: "",
     password: ""
   });
+  const [msg, setMsg] = useState("");
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const change = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const { name, email, gender, phoneNumber, password } = formData;
-
-    // Priority 1: Check if required fields are empty
-    if (!name) return "All fields are mandatory.";
-    if (!email) return "All fields are mandatory.";
-    if (!phoneNumber) return "All fields are mandatory.";
-    if (!password) return "All fields are mandatory.";
-
-    // Priority 2+: Field format validation
-    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
-      return "Name is not alphanumeric.";
-    }
-
-    if (!email.includes("@")) {
-      return "Email must contain @.";
-    }
-
-    if (!["male", "female", "other"].includes(gender)) {
-      return "Please identify as male, female or others.";
-    }
-
-    if (!/^\d+$/.test(phoneNumber)) {
-      return "Phone Number must contain only numbers.";
-    }
-
-    if (password.length < 6) {
-      return "Password must contain atleast 6 letters.";
-    }
-
-    return null;
-  };
-
-  const handleSubmit = (e) => {
+  const submit = (e) => {
     e.preventDefault();
+    const { name, email, gender, phoneNumber, password } = form;
 
-    const error = validate();
-    if (error) {
-      setMessage(error);
-    } else {
-      const username = formData.email.split("@")[0];
-      setMessage(`Hello ${username}`);
+    if (!name || !email || !phoneNumber || !password) {
+      return setMsg("All fields are mandatory");
     }
+    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
+      return setMsg("Name is not alphanumeric");
+    }
+    if (!email.includes("@")) {
+      return setMsg("Email must contain @");
+    }
+    if (!["male", "female", "other"].includes(gender)) {
+      return setMsg("Please identify as male, female or others");
+    }
+    if (!/^[0-9]+$/.test(phoneNumber)) {
+      return setMsg("Phone Number must contain only numbers");
+    }
+    if (password.length < 6) {
+      return setMsg("Password must contain atleast 6 letters");
+    }
+
+    const user = email.split("@")[0];
+    setMsg(`Hello ${user}`);
   };
 
   return (
     <div id="main">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={submit}>
         <input
           data-testid="name"
+          type="text"
           name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Name"
+          value={form.name}
+          onChange={change}
         />
-        <br />
-
         <input
           data-testid="email"
+          type="text"
           name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Email"
+          value={form.email}
+          onChange={change}
         />
-        <br />
-
         <select
           data-testid="gender"
           name="gender"
-          value={formData.gender}
-          onChange={handleChange}
+          value={form.gender}
+          onChange={change}
         >
           <option value="male">male</option>
           <option value="female">female</option>
           <option value="other">other</option>
         </select>
-        <br />
-
         <input
           data-testid="phoneNumber"
+          type="text"
           name="phoneNumber"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-          placeholder="Phone Number"
+          value={form.phoneNumber}
+          onChange={change}
         />
-        <br />
-
         <input
           data-testid="password"
-          name="password"
           type="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Password"
+          name="password"
+          value={form.password}
+          onChange={change}
         />
-        <br />
-
         <button data-testid="submit" type="submit">
           Submit
         </button>
       </form>
-
-      {message && <p>{message}</p>}
+      {msg && <p>{msg}</p>}
     </div>
   );
 };
