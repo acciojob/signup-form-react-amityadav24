@@ -9,61 +9,79 @@ const App = () => {
     phoneNumber: "",
     password: ""
   });
-  const [msg, setMsg] = useState("");
+  const [message, setMessage] = useState("");
 
-  const change = (e) => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const submit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const { name, email, gender, phoneNumber, password } = form;
 
+    // Priority 1: All fields are mandatory
     if (!name || !email || !phoneNumber || !password) {
-      return setMsg("All fields are mandatory");
-    }
-    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
-      return setMsg("Name is not alphanumeric");
-    }
-    if (!email.includes("@")) {
-      return setMsg("Email must contain @");
-    }
-    if (!["male", "female", "other"].includes(gender)) {
-      return setMsg("Please identify as male, female or others");
-    }
-    if (!/^[0-9]+$/.test(phoneNumber)) {
-      return setMsg("Phone Number must contain only numbers");
-    }
-    if (password.length < 6) {
-      return setMsg("Password must contain atleast 6 letters");
+      setMessage("All fields are mandatory");
+      return;
     }
 
-    const user = email.split("@")[0];
-    setMsg(`Hello ${user}`);
+    // Priority 2: Name must be alphanumeric
+    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
+      setMessage("Name is not alphanumeric");
+      return;
+    }
+
+    // Priority 3: Email must contain @
+    if (!email.includes("@")) {
+      setMessage("Email must contain @");
+      return;
+    }
+
+    // Priority 4: Gender must be male, female, other
+    if (!["male", "female", "other"].includes(gender)) {
+      setMessage("Please identify as male, female or others");
+      return;
+    }
+
+    // Priority 5: Phone Number must be numbers
+    if (!/^[0-9]+$/.test(phoneNumber)) {
+      setMessage("Phone Number must contain only numbers");
+      return;
+    }
+
+    // Priority 6: Password must be at least 6 characters
+    if (password.length < 6) {
+      setMessage("Password must contain atleast 6 letters");
+      return;
+    }
+
+    // All validations passed – greet user
+    const username = email.split("@")[0];
+    setMessage(`Hello ${username}`);
   };
 
   return (
     <div id="main">
-      <form onSubmit={submit}>
+      <form onSubmit={handleSubmit}>
         <input
           data-testid="name"
-          type="text"
           name="name"
+          type="text"
           value={form.name}
-          onChange={change}
+          onChange={handleChange}
         />
         <input
           data-testid="email"
-          type="text"
           name="email"
+          type="text"
           value={form.email}
-          onChange={change}
+          onChange={handleChange}
         />
         <select
           data-testid="gender"
           name="gender"
           value={form.gender}
-          onChange={change}
+          onChange={handleChange}
         >
           <option value="male">male</option>
           <option value="female">female</option>
@@ -71,23 +89,23 @@ const App = () => {
         </select>
         <input
           data-testid="phoneNumber"
-          type="text"
           name="phoneNumber"
+          type="text"
           value={form.phoneNumber}
-          onChange={change}
+          onChange={handleChange}
         />
         <input
           data-testid="password"
-          type="password"
           name="password"
+          type="password"
           value={form.password}
-          onChange={change}
+          onChange={handleChange}
         />
         <button data-testid="submit" type="submit">
           Submit
         </button>
       </form>
-      {msg && <p>{msg}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 };
