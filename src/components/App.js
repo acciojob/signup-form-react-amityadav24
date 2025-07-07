@@ -1,101 +1,162 @@
-import React, { useState } from "react";
-import "./../styles/App.css";
+import React, { Component } from "react";
 
-const App = () => {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    gender: "male",
-    phoneNumber: "",
-    password: ""
-  });
-  const [message, setMessage] = useState("");
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      email: "",
+      gender: "male", // default gender
+      phoneNumber: "",
+      password: "",
+      error: "",
+      successMessage: "",
+    };
+  }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  validateForm = () => {
+    const { name, email, gender, phoneNumber, password } = this.state;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const { name, email, gender, phoneNumber, password } = form;
-
-    if (!name || !email || !phoneNumber || !password) {
-      setMessage("All fields are mandatory");
-      return;
+    if (!name.trim() || !email.trim() || !phoneNumber.trim() || !password.trim()) {
+      return "All fields are mandatory.";
     }
-    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
-      setMessage("Name is not alphanumeric");
-      return;
+
+    const nameRegex = /^[a-zA-Z0-9 ]+$/;
+    if (!nameRegex.test(name)) {
+      return "Name is not alphanumeric.";
     }
+
     if (!email.includes("@")) {
-      setMessage("Email must contain @");
-      return;
-    }
-    if (!["male", "female", "other"].includes(gender)) {
-      setMessage("Please identify as male, female or others");
-      return;
-    }
-    if (!/^\d+$/.test(phoneNumber)) {
-      setMessage("Phone Number must contain only numbers");
-      return;
-    }
-    if (password.length < 6) {
-      setMessage("Password must contain atleast 6 letters");
-      return;
+      return "Email must contain @.";
     }
 
-    const username = email.split("@")[0];
-    setMessage(`Hello ${username}`);
+    const genderLower = gender.toLowerCase();
+    if (!["male", "female", "other", "others"].includes(genderLower)) {
+      return "Please identify as male, female or others.";
+    }
+
+    const phoneRegex = /^[0-9]+$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return "Phone Number must contain only numbers.";
+    }
+
+    if (password.length < 6) {
+      return "Password must contain atleast 6 letters";
+    }
+
+    return "";
   };
 
-  return (
-    <div id="main">
-      <form onSubmit={handleSubmit}>
-        <input
-          data-testid="name"
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <input
-          data-testid="email"
-          type="text"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-        />
-        <select
-          data-testid="gender"
-          name="gender"
-          value={form.gender}
-          onChange={handleChange}
-        >
-          <option value="male">male</option>
-          <option value="female">female</option>
-          <option value="other">other</option>
-        </select>
-        <input
-          data-testid="phoneNumber"
-          type="text"
-          name="phoneNumber"
-          value={form.phoneNumber}
-          onChange={handleChange}
-        />
-        <input
-          data-testid="password"
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-        />
-        <button data-testid="submit" type="submit">
-          Submit
-        </button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
-  );
-};
+  handleChange = (e) => {
+    this.setState({
+      [e.target.name]: e.target.value,
+      error: "",
+      successMessage: "",
+    });
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const errorMessage = this.validateForm();
+
+    if (errorMessage) {
+      this.setState({ error: errorMessage, successMessage: "" });
+    } else {
+      const username = this.state.email.split("@")[0];
+      this.setState({
+        error: "",
+        successMessage: `Hello ${username}`,
+      });
+    }
+  };
+
+  render() {
+    const { name, email, gender, phoneNumber, password, error, successMessage } = this.state;
+
+    return (
+      <div>
+        <form onSubmit={this.handleSubmit} noValidate>
+          <div>
+            <label>
+              Name:{" "}
+              <input
+                data-testid="name"
+                type="text"
+                name="name"
+                value={name}
+                onChange={this.handleChange}
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              Email address:{" "}
+              <input
+                data-testid="email"
+                type="text"
+                name="email"
+                value={email}
+                onChange={this.handleChange}
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              Gender:{" "}
+              <select
+                data-testid="gender"
+                name="gender"
+                value={gender}
+                onChange={this.handleChange}
+              >
+                <option value="male">male</option>
+                <option value="female">female</option>
+                <option value="other">other</option>
+                <option value="others">others</option>
+              </select>
+            </label>
+          </div>
+
+          <div>
+            <label>
+              Phone Number:{" "}
+              <input
+                data-testid="phoneNumber"
+                type="text"
+                name="phoneNumber"
+                value={phoneNumber}
+                onChange={this.handleChange}
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              Password:{" "}
+              <input
+                data-testid="password"
+                type="password"
+                name="password"
+                value={password}
+                onChange={this.handleChange}
+              />
+            </label>
+          </div>
+
+          <button data-testid="submit" type="submit">
+            Submit
+          </button>
+        </form>
+
+        {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+        {!error && successMessage && (
+          <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
+        )}
+      </div>
+    );
+  }
+}
 
 export default App;
